@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+  }
+}
+
+@layer components {
+  .bookmark-card {
+    @apply relative bg-white rounded-md overflow-hidden shadow-card transition-all duration-300 hover:shadow-card-hover hover:-translate-y-2;
+  }
+  
+  .tag-badge {
+    @apply inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-primary-100 text-primary-800;
+  }
+  
+  .btn-primary {
+    @apply px-4 py-2 text-white bg-primary-600 hover:bg-primary-700 rounded-md shadow-sm transition-colors duration-200;
+  }
+  
+  .btn-secondary {
+    @apply px-4 py-2 text-primary-700 bg-primary-100 hover:bg-primary-200 rounded-md shadow-sm transition-colors duration-200;
+  }
+  
+  .btn-accent {
+    @apply px-4 py-2 text-white bg-accent-500 hover:bg-accent-600 rounded-md shadow-sm transition-colors duration-200;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition duration-200;
+  }
+  
+  .modal-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center overflow-auto;
+  }
+  
+  .modal-content {
+    @apply bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl m-4 max-h-[90vh] overflow-y-auto;
+  }
+}
