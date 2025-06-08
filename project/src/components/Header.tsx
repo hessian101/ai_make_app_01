@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Search, X, SlidersHorizontal, BookOpen } from 'lucide-react';
+import { Search, X, SlidersHorizontal, BookOpen, Plus } from 'lucide-react';
 import { useBookmarkStore } from '../store/bookmarkStore';
+import UserMenu from './UserMenu';
 
 interface HeaderProps {
   onAddNew: () => void;
@@ -25,107 +26,99 @@ const Header: React.FC<HeaderProps> = ({ onAddNew }) => {
   };
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-20">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+    <header className="header-container">
+      <div className="header-content">
         {/* Logo */}
-        <div className="flex items-center">
-          <BookOpen size={28} className="text-primary-600 mr-2" />
-          <h1 className="text-xl font-bold text-primary-800 hidden sm:block">BookShelf</h1>
+        <div className="logo-section">
+          <div className="logo-icon">
+            <BookOpen size={32} className="text-primary-600" />
+          </div>
+          <div className="logo-text">
+            <h1 className="logo-title">BookShelf</h1>
+            <p className="logo-subtitle">ブックマーク管理</p>
+          </div>
         </div>
 
-        {/* Search and actions - responsive layout */}
-        <div className={`flex items-center ${isSearchExpanded ? 'flex-1 mx-4' : ''}`}>
+        {/* Search and actions */}
+        <div className={`search-section ${isSearchExpanded ? 'expanded' : ''}`}>
           {/* Search */}
-          <div className={`relative ${isSearchExpanded ? 'w-full' : 'w-auto'}`}>
-            <div className="relative flex items-center">
-              <button
-                onClick={() => setIsSearchExpanded(!isSearchExpanded)}
-                className={`p-2 text-gray-500 ${isSearchExpanded ? 'hidden sm:block' : 'block'}`}
-              >
-                <Search size={20} />
-              </button>
-              {(isSearchExpanded || window.innerWidth > 640) && (
-                <input
-                  type="text"
-                  placeholder="Search bookmarks..."
-                  value={filterOptions.search}
-                  onChange={handleSearchChange}
-                  className="w-full pl-10 pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition duration-200"
-                />
+          <div className="search-container">
+            <div className="search-input-wrapper">
+              <Search size={20} className="search-icon" />
+              <input
+                type="text"
+                placeholder="ブックマークを検索..."
+                value={filterOptions.search}
+                onChange={handleSearchChange}
+                className="search-input"
+              />
+              {filterOptions.search && (
+                <button 
+                  onClick={clearSearch} 
+                  className="clear-search-btn"
+                >
+                  <X size={16} />
+                </button>
               )}
-              {isSearchExpanded && (
-                <div className="absolute right-2 flex items-center">
-                  {filterOptions.search && (
-                    <button 
-                      onClick={clearSearch} 
-                      className="text-gray-400 hover:text-gray-600 mr-1"
-                    >
-                      <X size={16} />
-                    </button>
-                  )}
-                  <button 
-                    onClick={() => setIsSearchExpanded(false)}
-                    className="text-gray-400 hover:text-gray-600 sm:hidden"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-              )}
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
-                {!isSearchExpanded && <Search size={16} />}
-              </div>
             </div>
           </div>
 
           {/* Sort dropdown */}
-          <div className="relative ml-2">
+          <div className="sort-dropdown">
             <button 
-              className="p-2 text-gray-600 hover:text-primary-600 rounded-md hover:bg-gray-100"
+              className="sort-btn"
               onClick={() => setSortMenuOpen(!sortMenuOpen)}
             >
               <SlidersHorizontal size={20} />
             </button>
             
             {sortMenuOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                <div className="px-4 py-2 text-sm text-gray-700 font-medium border-b">Sort by</div>
+              <div className="sort-menu">
+                <div className="sort-menu-header">並び替え</div>
                 <button 
-                  className={`block px-4 py-2 text-sm w-full text-left ${filterOptions.sortBy === 'createdAt' ? 'text-primary-600 bg-primary-50' : 'text-gray-700'}`}
+                  className={`sort-option ${filterOptions.sortBy === 'createdAt' && filterOptions.sortDirection === 'desc' ? 'active' : ''}`}
                   onClick={() => handleSortChange('createdAt', 'desc')}
                 >
-                  Newest First
+                  新しい順
                 </button>
                 <button 
-                  className={`block px-4 py-2 text-sm w-full text-left ${filterOptions.sortBy === 'createdAt' && filterOptions.sortDirection === 'asc' ? 'text-primary-600 bg-primary-50' : 'text-gray-700'}`}
+                  className={`sort-option ${filterOptions.sortBy === 'createdAt' && filterOptions.sortDirection === 'asc' ? 'active' : ''}`}
                   onClick={() => handleSortChange('createdAt', 'asc')}
                 >
-                  Oldest First
+                  古い順
                 </button>
                 <button 
-                  className={`block px-4 py-2 text-sm w-full text-left ${filterOptions.sortBy === 'title' ? 'text-primary-600 bg-primary-50' : 'text-gray-700'}`}
+                  className={`sort-option ${filterOptions.sortBy === 'title' ? 'active' : ''}`}
                   onClick={() => handleSortChange('title', 'asc')}
                 >
-                  Title A-Z
+                  タイトル順
                 </button>
                 <button 
-                  className={`block px-4 py-2 text-sm w-full text-left ${filterOptions.sortBy === 'viewCount' ? 'text-primary-600 bg-primary-50' : 'text-gray-700'}`}
+                  className={`sort-option ${filterOptions.sortBy === 'viewCount' ? 'active' : ''}`}
                   onClick={() => handleSortChange('viewCount', 'desc')}
                 >
-                  Most Viewed
+                  閲覧回数順
                 </button>
               </div>
             )}
           </div>
         </div>
 
-        {/* Add button */}
-        <button 
-          onClick={onAddNew}
-          className="btn-primary flex items-center"
-          aria-label="Add new bookmark"
-        >
-          <span className="mr-1">+</span> Add New
-        </button>
+        {/* Actions */}
+        <div className="flex items-center space-x-3">
+          {/* Add button */}
+          <button 
+            onClick={onAddNew}
+            className="add-btn"
+            aria-label="新しいブックマークを追加"
+          >
+            <Plus size={20} className="mr-2" />
+            <span className="add-btn-text">追加</span>
+          </button>
+
+          {/* User Menu */}
+          <UserMenu />
+        </div>
       </div>
     </header>
   );

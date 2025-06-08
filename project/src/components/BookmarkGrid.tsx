@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import BookmarkCard from './BookmarkCard';
+import BookshelfLayout from './BookshelfLayout';
 import { BookmarkItem, FilterOptions } from '../types';
 
 interface BookmarkGridProps {
@@ -26,18 +26,17 @@ const BookmarkGrid: React.FC<BookmarkGridProps> = ({
       bookmark.title.toLowerCase().includes(searchLower) ||
       (bookmark.description?.toLowerCase() || '').includes(searchLower) ||
       (bookmark.memo?.toLowerCase() || '').includes(searchLower) ||
+      (bookmark.siteName?.toLowerCase() || '').includes(searchLower) ||
       bookmark.tags.some((tag) => tag.toLowerCase().includes(searchLower));
 
     // Tags filter
     let matchesTags = true;
     if (filterOptions.tags.length > 0) {
       if (filterOptions.tagFilterType === 'AND') {
-        // All selected tags must be present
         matchesTags = filterOptions.tags.every((tag) =>
           bookmark.tags.includes(tag)
         );
       } else {
-        // At least one selected tag must be present
         matchesTags = filterOptions.tags.some((tag) =>
           bookmark.tags.includes(tag)
         );
@@ -47,7 +46,12 @@ const BookmarkGrid: React.FC<BookmarkGridProps> = ({
     // Bookmarked filter
     const matchesBookmarked = !filterOptions.onlyBookmarked || bookmark.isBookmarked;
 
-    return matchesSearch && matchesTags && matchesBookmarked;
+    // Shelf type filter
+    const matchesShelfType = !filterOptions.shelfType || 
+      filterOptions.shelfType === 'all' || 
+      bookmark.type === filterOptions.shelfType;
+
+    return matchesSearch && matchesTags && matchesBookmarked && matchesShelfType;
   });
 
   // Sort the filtered bookmarks
@@ -86,45 +90,43 @@ const BookmarkGrid: React.FC<BookmarkGridProps> = ({
   return (
     <div className="w-full">
       {sortedBookmarks.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 bg-white rounded-lg p-6 text-center">
-          <p className="text-lg text-gray-600 mb-2">No bookmarks found</p>
-          <p className="text-sm text-gray-500">
-            {filterOptions.search || filterOptions.tags.length > 0 || filterOptions.onlyBookmarked
-              ? 'Try changing your filters or search term'
-              : 'Add your first bookmark using the + button above'}
-          </p>
+        <div className="empty-bookshelf">
+          <div className="empty-shelf-content">
+            <div className="empty-shelf-icon">📚</div>
+            <h3 className="empty-shelf-title">本棚が空です</h3>
+            <p className="empty-shelf-description">
+              {filterOptions.search || filterOptions.tags.length > 0 || filterOptions.onlyBookmarked
+                ? 'フィルターを変更するか、検索条件を調整してください'
+                : '最初のブックマークを追加して、あなたの本棚を作り始めましょう'}
+            </p>
+          </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
-          {sortedBookmarks.map((bookmark) => (
-            <BookmarkCard
-              key={bookmark.id}
-              bookmark={bookmark}
-              onEdit={onEditBookmark}
-              onDelete={handleDelete}
-            />
-          ))}
-        </div>
+        <BookshelfLayout
+          bookmarks={sortedBookmarks}
+          onEditBookmark={onEditBookmark}
+          onDeleteBookmark={handleDelete}
+        />
       )}
 
       {/* Delete confirmation modal */}
       {confirmDelete && (
         <div className="modal-overlay">
           <div className="modal-content max-w-md">
-            <h3 className="text-lg font-medium mb-4">Confirm Deletion</h3>
-            <p className="mb-6">Are you sure you want to delete this bookmark? This action cannot be undone.</p>
+            <h3 className="text-lg font-medium mb-4">削除の確認</h3>
+            <p className="mb-6">このブックマークを削除してもよろしいですか？この操作は取り消せません。</p>
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setConfirmDelete(null)}
                 className="btn-secondary"
               >
-                Cancel
+                キャンセル
               </button>
               <button
                 onClick={confirmDeleteAction}
                 className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-md shadow-sm transition-colors"
               >
-                Delete
+                削除
               </button>
             </div>
           </div>

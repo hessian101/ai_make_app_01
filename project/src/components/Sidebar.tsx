@@ -1,24 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { Tag, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Tag, X, ChevronDown, ChevronUp, Search, Bookmark, FileText, Grid } from 'lucide-react';
 import { useBookmarkStore } from '../store/bookmarkStore';
-import * as db from '../db';
+import { getAllTagsWithCount } from '../db/supabaseHelpers';
 
 const Sidebar: React.FC = () => {
-  const [allTags, setAllTags] = useState<string[]>([]);
+  const [allTags, setAllTags] = useState<{ tag: string; count: number }[]>([]);
+  const [tagSearch, setTagSearch] = useState('');
   const [isExpanded, setIsExpanded] = useState(true);
   const { filterOptions, setFilterOptions, resetFilters } = useBookmarkStore();
   
   useEffect(() => {
     const fetchTags = async () => {
-      const tagsWithCount = await db.getAllTagsWithCount();
-      setAllTags(tagsWithCount.map(({ tag }) => tag));
+      const tagsWithCount = await getAllTagsWithCount();
+      setAllTags(tagsWithCount);
     };
     
     fetchTags();
   }, []);
   
+  const filteredTags = allTags.filter(({ tag }) =>
+    tag.toLowerCase().includes(tagSearch.toLowerCase())
+  );
+  
   const handleTagClick = (tag: string) => {
-    // If tag is already selected, remove it; otherwise add it
     const newTags = filterOptions.tags.includes(tag)
       ? filterOptions.tags.filter(t => t !== tag)
       : [...filterOptions.tags, tag];
@@ -35,50 +39,83 @@ const Sidebar: React.FC = () => {
   const toggleBookmarked = () => {
     setFilterOptions({ onlyBookmarked: !filterOptions.onlyBookmarked });
   };
+
+  const setShelfFilter = (shelfType: 'all' | 'bookmark' | 'memo') => {
+    setFilterOptions({ shelfType });
+  };
   
   const handleReset = () => {
     resetFilters();
+    setTagSearch('');
   };
   
   return (
-    <aside className="bg-white p-4 rounded-lg shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-medium text-gray-900 flex items-center">
+    <aside className="sidebar-container">
+      <div className="sidebar-header">
+        <h2 className="sidebar-title">
           <Tag size={18} className="mr-2" />
-          Filters
+          フィルター
         </h2>
         <button 
           onClick={() => setIsExpanded(!isExpanded)} 
-          className="text-gray-500 hover:text-gray-700"
+          className="expand-btn"
         >
           {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
       </div>
       
       {isExpanded && (
-        <>
+        <div className="sidebar-content">
+          {/* Shelf Type Filter */}
+          <div className="filter-section">
+            <h3 className="filter-section-title">棚の種類</h3>
+            <div className="shelf-filter-buttons">
+              <button
+                onClick={() => setShelfFilter('all')}
+                className={`shelf-filter-btn ${(!filterOptions.shelfType || filterOptions.shelfType === 'all') ? 'active' : ''}`}
+              >
+                <Grid size={16} className="mr-2" />
+                すべて
+              </button>
+              <button
+                onClick={() => setShelfFilter('bookmark')}
+                className={`shelf-filter-btn ${filterOptions.shelfType === 'bookmark' ? 'active' : ''}`}
+              >
+                <Bookmark size={16} className="mr-2" />
+                ブックマーク
+              </button>
+              <button
+                onClick={() => setShelfFilter('memo')}
+                className={`shelf-filter-btn ${filterOptions.shelfType === 'memo' ? 'active' : ''}`}
+              >
+                <FileText size={16} className="mr-2" />
+                メモ
+              </button>
+            </div>
+          </div>
+
           {/* Active filters */}
           {(filterOptions.tags.length > 0 || filterOptions.onlyBookmarked) && (
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-medium text-gray-700">Active Filters</h3>
+            <div className="filter-section">
+              <div className="active-filters-header">
+                <h3 className="filter-section-title">アクティブフィルター</h3>
                 <button 
                   onClick={handleReset}
-                  className="text-xs text-primary-600 hover:text-primary-800"
+                  className="reset-btn"
                 >
-                  Reset All
+                  すべてリセット
                 </button>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="active-filters">
                 {filterOptions.tags.map(tag => (
                   <span 
                     key={tag} 
-                    className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-primary-600 text-white"
+                    className="active-filter-tag"
                   >
                     #{tag}
                     <button 
                       onClick={() => handleTagClick(tag)}
-                      className="ml-1 text-white hover:text-gray-200"
+                      className="remove-filter-btn"
                     >
                       <X size={12} />
                     </button>
@@ -86,13 +123,11 @@ const Sidebar: React.FC = () => {
                 ))}
                 
                 {filterOptions.onlyBookmarked && (
-                  <span 
-                    className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-accent-500 text-white"
-                  >
-                    Bookmarked Only
+                  <span className="active-filter-bookmark">
+                    ブックマークのみ
                     <button 
                       onClick={toggleBookmarked}
-                      className="ml-1 text-white hover:text-gray-200"
+                      className="remove-filter-btn"
                     >
                       <X size={12} />
                     </button>
@@ -101,25 +136,17 @@ const Sidebar: React.FC = () => {
               </div>
               
               {filterOptions.tags.length > 1 && (
-                <div className="mt-2 flex items-center">
-                  <span className="text-xs text-gray-500 mr-2">Match:</span>
+                <div className="tag-logic-toggle">
+                  <span className="tag-logic-label">マッチ条件:</span>
                   <button
                     onClick={toggleTagFilterType}
-                    className={`text-xs px-2 py-1 rounded ${
-                      filterOptions.tagFilterType === 'AND'
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-gray-200 text-gray-800'
-                    }`}
+                    className={`logic-btn ${filterOptions.tagFilterType === 'AND' ? 'active' : ''}`}
                   >
                     AND
                   </button>
                   <button
                     onClick={toggleTagFilterType}
-                    className={`text-xs px-2 py-1 rounded ml-1 ${
-                      filterOptions.tagFilterType === 'OR'
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-gray-200 text-gray-800'
-                    }`}
+                    className={`logic-btn ${filterOptions.tagFilterType === 'OR' ? 'active' : ''}`}
                   >
                     OR
                   </button>
@@ -129,49 +156,52 @@ const Sidebar: React.FC = () => {
           )}
           
           {/* Bookmark filter */}
-          <div className="mb-4">
+          <div className="filter-section">
             <button
               onClick={toggleBookmarked}
-              className={`w-full text-left px-3 py-2 rounded-md text-sm flex items-center ${
-                filterOptions.onlyBookmarked
-                  ? 'bg-accent-100 text-accent-800'
-                  : 'hover:bg-gray-100'
-              }`}
+              className={`bookmark-filter-btn ${filterOptions.onlyBookmarked ? 'active' : ''}`}
             >
-              <span className={`mr-2 ${filterOptions.onlyBookmarked ? 'text-accent-600' : 'text-gray-400'}`}>
-                <Tag size={16} />
-              </span>
-              Bookmarked Only
+              <Bookmark size={16} className="mr-2" />
+              ブックマークのみ
             </button>
           </div>
           
           {/* Tags list */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Tags</h3>
-            <div className="max-h-96 overflow-y-auto pr-1">
-              {allTags.length === 0 ? (
-                <p className="text-sm text-gray-500">No tags yet</p>
+          <div className="filter-section">
+            <h3 className="filter-section-title">ハッシュタグ</h3>
+            
+            {/* Tag search */}
+            <div className="tag-search">
+              <Search size={16} className="search-icon" />
+              <input
+                type="text"
+                placeholder="タグを検索..."
+                value={tagSearch}
+                onChange={(e) => setTagSearch(e.target.value)}
+                className="tag-search-input"
+              />
+            </div>
+            
+            <div className="tags-list">
+              {filteredTags.length === 0 ? (
+                <p className="no-tags">
+                  {tagSearch ? '該当するタグがありません' : 'タグがまだありません'}
+                </p>
               ) : (
-                allTags.map(tag => (
+                filteredTags.map(({ tag, count }) => (
                   <button
                     key={tag}
                     onClick={() => handleTagClick(tag)}
-                    className={`w-full text-left px-3 py-2 rounded-md text-sm mb-1 flex items-center ${
-                      filterOptions.tags.includes(tag)
-                        ? 'bg-primary-100 text-primary-800'
-                        : 'hover:bg-gray-100'
-                    }`}
+                    className={`tag-item ${filterOptions.tags.includes(tag) ? 'selected' : ''}`}
                   >
-                    <span className={`mr-2 ${filterOptions.tags.includes(tag) ? 'text-primary-600' : 'text-gray-400'}`}>
-                      #
-                    </span>
-                    {tag}
+                    <span className="tag-name">#{tag}</span>
+                    <span className="tag-count">{count}</span>
                   </button>
                 ))
               )}
             </div>
           </div>
-        </>
+        </div>
       )}
     </aside>
   );

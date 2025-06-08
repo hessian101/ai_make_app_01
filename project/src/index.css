@@ -13,14 +13,438 @@
 }
 
 @layer components {
-  .bookmark-card {
-    @apply relative bg-white rounded-md overflow-hidden shadow-card transition-all duration-300 hover:shadow-card-hover hover:-translate-y-2;
+  /* Header Styles */
+  .header-container {
+    @apply bg-gradient-to-r from-primary-800 to-primary-700 shadow-lg sticky top-0 z-30;
+  }
+  
+  .header-content {
+    @apply container mx-auto px-4 py-4 flex items-center justify-between;
+  }
+  
+  .logo-section {
+    @apply flex items-center space-x-3;
+  }
+  
+  .logo-icon {
+    @apply p-2 bg-white bg-opacity-20 rounded-lg;
+  }
+  
+  .logo-text {
+    @apply hidden sm:block;
+  }
+  
+  .logo-title {
+    @apply text-2xl font-bold text-white;
+  }
+  
+  .logo-subtitle {
+    @apply text-sm text-primary-200;
+  }
+  
+  .search-section {
+    @apply flex items-center space-x-3 flex-1 max-w-2xl mx-4;
+  }
+  
+  .search-container {
+    @apply flex-1;
+  }
+  
+  .search-input-wrapper {
+    @apply relative flex items-center;
+  }
+  
+  .search-icon {
+    @apply absolute left-3 text-gray-400 pointer-events-none;
+  }
+  
+  .search-input {
+    @apply w-full pl-10 pr-10 py-3 bg-white bg-opacity-90 border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-400 focus:bg-white transition-all duration-200 placeholder-gray-500;
+  }
+  
+  .clear-search-btn {
+    @apply absolute right-3 text-gray-400 hover:text-gray-600 transition-colors;
+  }
+  
+  .sort-dropdown {
+    @apply relative;
+  }
+  
+  .sort-btn {
+    @apply p-3 text-white hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors;
+  }
+  
+  .sort-menu {
+    @apply absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-20;
+  }
+  
+  .sort-menu-header {
+    @apply px-4 py-2 text-sm text-gray-700 font-medium border-b;
+  }
+  
+  .sort-option {
+    @apply block px-4 py-2 text-sm w-full text-left hover:bg-gray-100 transition-colors;
+  }
+  
+  .sort-option.active {
+    @apply text-primary-600 bg-primary-50;
+  }
+  
+  .add-btn {
+    @apply flex items-center px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white rounded-lg shadow-md transition-all duration-300 hover:scale-105 hover:shadow-lg;
+  }
+  
+  .add-btn-text {
+    @apply hidden sm:inline;
+  }
+
+  /* Sidebar Styles */
+  .sidebar-container {
+    @apply bg-white rounded-lg shadow-md h-fit sticky top-24;
+  }
+  
+  .sidebar-header {
+    @apply flex justify-between items-center p-4 border-b;
+  }
+  
+  .sidebar-title {
+    @apply text-lg font-medium text-gray-900 flex items-center;
+  }
+  
+  .expand-btn {
+    @apply text-gray-500 hover:text-gray-700 transition-colors;
+  }
+  
+  .sidebar-content {
+    @apply p-4 space-y-6;
+  }
+  
+  .filter-section {
+    @apply space-y-3;
+  }
+  
+  .filter-section-title {
+    @apply text-sm font-medium text-gray-700;
+  }
+  
+  .shelf-filter-buttons {
+    @apply space-y-2;
+  }
+  
+  .shelf-filter-btn {
+    @apply w-full flex items-center px-3 py-2 text-sm rounded-md transition-colors;
+  }
+  
+  .shelf-filter-btn:not(.active) {
+    @apply text-gray-700 hover:bg-gray-100;
+  }
+  
+  .shelf-filter-btn.active {
+    @apply bg-primary-100 text-primary-800;
+  }
+  
+  .active-filters-header {
+    @apply flex justify-between items-center;
+  }
+  
+  .reset-btn {
+    @apply text-xs text-primary-600 hover:text-primary-800 transition-colors;
+  }
+  
+  .active-filters {
+    @apply flex flex-wrap gap-2;
+  }
+  
+  .active-filter-tag {
+    @apply inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-primary-600 text-white;
+  }
+  
+  .active-filter-bookmark {
+    @apply inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-accent-500 text-white;
+  }
+  
+  .remove-filter-btn {
+    @apply ml-1 text-white hover:text-gray-200 transition-colors;
+  }
+  
+  .tag-logic-toggle {
+    @apply flex items-center space-x-2 mt-2;
+  }
+  
+  .tag-logic-label {
+    @apply text-xs text-gray-500;
+  }
+  
+  .logic-btn {
+    @apply text-xs px-2 py-1 rounded transition-colors;
+  }
+  
+  .logic-btn:not(.active) {
+    @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
+  }
+  
+  .logic-btn.active {
+    @apply bg-primary-600 text-white;
+  }
+  
+  .bookmark-filter-btn {
+    @apply w-full flex items-center px-3 py-2 text-sm rounded-md transition-colors;
+  }
+  
+  .bookmark-filter-btn:not(.active) {
+    @apply text-gray-700 hover:bg-gray-100;
+  }
+  
+  .bookmark-filter-btn.active {
+    @apply bg-accent-100 text-accent-800;
+  }
+  
+  .tag-search {
+    @apply relative;
+  }
+  
+  .tag-search .search-icon {
+    @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none;
+  }
+  
+  .tag-search-input {
+    @apply w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-sm;
+  }
+  
+  .tags-list {
+    @apply max-h-64 overflow-y-auto space-y-1;
+  }
+  
+  .no-tags {
+    @apply text-sm text-gray-500 text-center py-4;
+  }
+  
+  .tag-item {
+    @apply w-full flex items-center justify-between px-3 py-2 text-sm rounded-md transition-colors;
+  }
+  
+  .tag-item:not(.selected) {
+    @apply text-gray-700 hover:bg-gray-100;
+  }
+  
+  .tag-item.selected {
+    @apply bg-primary-100 text-primary-800;
+  }
+  
+  .tag-name {
+    @apply flex-1 text-left;
+  }
+  
+  .tag-count {
+    @apply text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full;
+  }
+  
+  .tag-item.selected .tag-count {
+    @apply bg-primary-200 text-primary-700;
+  }
+
+  /* Bookshelf Layout Styles */
+  .bookshelf-container {
+    @apply space-y-8;
+  }
+  
+  .shelf-section {
+    @apply bg-gradient-to-b from-amber-50 to-amber-100 rounded-lg shadow-lg overflow-hidden;
+  }
+  
+  .shelf-header {
+    @apply relative;
+  }
+  
+  .shelf-content {
+    @apply transition-all duration-500 ease-in-out overflow-hidden;
+  }
+  
+  .shelf-content.collapsed {
+    @apply max-h-0;
+  }
+  
+  .shelf-content:not(.collapsed) {
+    @apply max-h-none;
+  }
+  
+  .shelf-board {
+    @apply p-6 bg-gradient-to-b from-amber-100 to-amber-200 border-t-4 border-amber-800 relative;
+  }
+  
+  .shelf-board::before {
+    content: '';
+    @apply absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-amber-700 via-amber-800 to-amber-700 shadow-inner;
+  }
+  
+  .empty-shelf {
+    @apply min-h-32 flex items-center justify-center;
+  }
+  
+  .books-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6;
+  }
+  
+  .book-slot {
+    @apply transform transition-all duration-300 hover:scale-105;
+  }
+
+  /* 3D Bookmark Card Styles */
+  .bookmark-card-3d {
+    @apply relative bg-white rounded-lg shadow-lg transition-all duration-300 ease-out transform-gpu perspective-1000 h-80;
+  }
+  
+  .bookmark-card-3d:hover {
+    @apply -translate-y-3 shadow-2xl;
+    transform: translateY(-12px) rotateX(5deg);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+  
+  .card-spine {
+    @apply absolute left-0 top-0 bottom-0 w-2 bg-gradient-to-b from-primary-600 to-primary-800 rounded-l-lg;
+  }
+  
+  .card-content {
+    @apply h-full flex flex-col ml-2;
+  }
+  
+  .thumbnail-container {
+    @apply relative flex-shrink-0 h-40 bg-gray-200 overflow-hidden rounded-t-lg;
+  }
+  
+  .thumbnail-image {
+    @apply w-full h-full object-cover transition-transform duration-300 group-hover:scale-105;
+  }
+  
+  .memo-thumbnail {
+    @apply w-full h-full bg-gradient-to-br from-primary-100 to-primary-200 flex flex-col items-center justify-center p-4;
+  }
+  
+  .memo-icon-container {
+    @apply mb-2;
+  }
+  
+  .memo-preview {
+    @apply text-center;
+  }
+  
+  .site-name-display {
+    @apply w-full h-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center p-4;
+  }
+  
+  .site-name-text {
+    @apply text-white text-lg font-bold text-center leading-tight;
+  }
+  
+  .view-badge {
+    @apply absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full flex items-center;
+  }
+  
+  .bookmark-icon {
+    @apply absolute top-2 right-2 p-1 rounded-full transition-all duration-200;
+  }
+  
+  .bookmark-icon:not(.bookmarked) {
+    @apply text-white bg-black bg-opacity-50 opacity-0 group-hover:opacity-100;
+  }
+  
+  .bookmark-icon.bookmarked {
+    @apply text-accent-500 bg-white bg-opacity-90;
+  }
+  
+  .card-info {
+    @apply flex-1 p-4 flex flex-col;
+  }
+  
+  .card-title {
+    @apply text-sm font-semibold line-clamp-2 mb-2 text-gray-900;
+  }
+  
+  .card-description {
+    @apply text-xs text-gray-600 line-clamp-2 mb-3;
+  }
+  
+  .tags-container {
+    @apply flex flex-wrap gap-1 mb-3;
   }
   
   .tag-badge {
     @apply inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-primary-100 text-primary-800;
   }
   
+  .card-footer {
+    @apply flex justify-between items-center text-xs text-gray-500 mt-auto;
+  }
+  
+  .timestamp {
+    @apply flex-1;
+  }
+  
+  .action-buttons {
+    @apply flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200;
+  }
+  
+  .action-btn {
+    @apply p-1 rounded transition-colors;
+  }
+  
+  .edit-btn {
+    @apply hover:text-primary-600 hover:bg-primary-50;
+  }
+  
+  .delete-btn {
+    @apply hover:text-red-600 hover:bg-red-50;
+  }
+  
+  .visit-btn {
+    @apply hover:text-accent-600 hover:bg-accent-50;
+  }
+
+  /* Empty State Styles */
+  .empty-bookshelf {
+    @apply flex items-center justify-center min-h-96 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border-2 border-dashed border-gray-300;
+  }
+  
+  .empty-shelf-content {
+    @apply text-center p-8;
+  }
+  
+  .empty-shelf-icon {
+    @apply text-6xl mb-4;
+  }
+  
+  .empty-shelf-title {
+    @apply text-xl font-semibold text-gray-700 mb-2;
+  }
+  
+  .empty-shelf-description {
+    @apply text-gray-500 max-w-md;
+  }
+
+  /* Utility Classes */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  .transform-gpu {
+    transform: translateZ(0);
+  }
+
+  /* Button Styles */
   .btn-primary {
     @apply px-4 py-2 text-white bg-primary-600 hover:bg-primary-700 rounded-md shadow-sm transition-colors duration-200;
   }
@@ -43,5 +467,14 @@
   
   .modal-content {
     @apply bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl m-4 max-h-[90vh] overflow-y-auto;
+  }
+
+  /* Add Button Styles */
+  .add-button-fixed {
+    @apply fixed right-6 bottom-6 w-14 h-14 bg-accent-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-accent-600 transition-all duration-300 hover:scale-110 z-20;
+  }
+  
+  .add-button-icon {
+    @apply transition-transform duration-300 hover:rotate-90;
   }
 }

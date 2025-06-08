@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { Bookmark, Eye, ExternalLink, Edit, Trash2 } from 'lucide-react';
+import { Bookmark, Eye, ExternalLink, Edit, Trash2, FileText } from 'lucide-react';
 import { BookmarkItem } from '../types';
 import { useBookmarkStore } from '../store/bookmarkStore';
 
@@ -19,7 +19,9 @@ const BookmarkCard: React.FC<BookmarkCardProps> = ({
   
   const handleVisit = () => {
     incrementViewCount(bookmark.id);
-    window.open(bookmark.url, '_blank', 'noopener,noreferrer');
+    if (bookmark.url) {
+      window.open(bookmark.url, '_blank', 'noopener,noreferrer');
+    }
   };
   
   const handleToggleBookmark = (e: React.MouseEvent) => {
@@ -40,91 +42,121 @@ const BookmarkCard: React.FC<BookmarkCardProps> = ({
   const getTimeAgo = (date: Date) => {
     return formatDistanceToNow(date, { addSuffix: true });
   };
+
+  const renderThumbnail = () => {
+    if (bookmark.type === 'memo') {
+      return (
+        <div className="memo-thumbnail">
+          <div className="memo-icon-container">
+            <FileText size={32} className="text-primary-600" />
+          </div>
+          <div className="memo-preview">
+            <p className="text-sm text-gray-700 line-clamp-3">
+              {bookmark.memo || bookmark.description || 'メモ'}
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    if (bookmark.thumbnail || bookmark.customImage) {
+      return (
+        <img 
+          src={bookmark.customImage || bookmark.thumbnail} 
+          alt={bookmark.title}
+          className="thumbnail-image"
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = 'none';
+            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+          }}
+        />
+      );
+    }
+
+    return (
+      <div className="site-name-display">
+        <div className="site-name-text">
+          {bookmark.siteName || bookmark.title}
+        </div>
+      </div>
+    );
+  };
   
   return (
     <div 
-      className="bookmark-card group cursor-pointer"
+      className="bookmark-card-3d group cursor-pointer"
       onClick={bookmark.type === 'bookmark' ? handleVisit : handleEdit}
     >
-      <div className="relative">
-        {/* Thumbnail Image */}
-        <div className="relative aspect-video bg-gray-200 overflow-hidden">
-          {bookmark.thumbnail ? (
-            <img 
-              src={bookmark.thumbnail} 
-              alt={bookmark.title}
-              className="w-full h-full object-cover transition-transform group-hover:scale-105"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-primary-100">
-              <span className="text-primary-600">{bookmark.type === 'memo' ? 'Memo' : 'No Image'}</span>
-            </div>
-          )}
+      <div className="card-spine"></div>
+      <div className="card-content">
+        {/* Thumbnail/Content Area */}
+        <div className="thumbnail-container">
+          {renderThumbnail()}
           
           {/* View count badge */}
-          <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full flex items-center">
+          <div className="view-badge">
             <Eye size={12} className="mr-1" />
             <span>{bookmark.viewCount}</span>
           </div>
-        </div>
-        
-        {/* Bookmark icon */}
-        <button 
-          className={`absolute top-2 right-2 p-1 rounded-full transition-colors ${
-            bookmark.isBookmarked ? 'text-accent-500 bg-white bg-opacity-90' : 'text-white bg-black bg-opacity-50 opacity-0 group-hover:opacity-100'
-          }`}
-          onClick={handleToggleBookmark}
-          title={bookmark.isBookmarked ? "Remove bookmark" : "Add bookmark"}
-        >
-          <Bookmark size={16} fill={bookmark.isBookmarked ? "currentColor" : "none"} />
-        </button>
-      </div>
-      
-      {/* Content */}
-      <div className="p-3">
-        <h3 className="text-sm font-medium line-clamp-2 mb-1">{bookmark.title}</h3>
-        <p className="text-xs text-gray-600 line-clamp-2 mb-2">{bookmark.description}</p>
-        
-        {/* Tags */}
-        <div className="flex flex-wrap gap-1 mb-2">
-          {bookmark.tags.slice(0, 3).map(tag => (
-            <span key={tag} className="tag-badge">#{tag}</span>
-          ))}
-          {bookmark.tags.length > 3 && (
-            <span className="tag-badge">+{bookmark.tags.length - 3}</span>
-          )}
-        </div>
-        
-        {/* Footer */}
-        <div className="flex justify-between items-center text-xs text-gray-500 mt-auto">
-          <span title={new Date(bookmark.createdAt).toLocaleString()}>
-            {getTimeAgo(new Date(bookmark.createdAt))}
-          </span>
           
-          <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button 
-              className="p-1 hover:text-primary-600" 
-              onClick={handleEdit}
-              title="Edit"
-            >
-              <Edit size={14} />
-            </button>
-            <button 
-              className="p-1 hover:text-red-600" 
-              onClick={handleDelete}
-              title="Delete"
-            >
-              <Trash2 size={14} />
-            </button>
-            {bookmark.type === 'bookmark' && (
-              <button 
-                className="p-1 hover:text-primary-600" 
-                onClick={handleVisit}
-                title="Open link"
-              >
-                <ExternalLink size={14} />
-              </button>
+          {/* Bookmark icon */}
+          <button 
+            className={`bookmark-icon ${bookmark.isBookmarked ? 'bookmarked' : ''}`}
+            onClick={handleToggleBookmark}
+            title={bookmark.isBookmarked ? "Remove bookmark" : "Add bookmark"}
+          >
+            <Bookmark size={16} fill={bookmark.isBookmarked ? "currentColor" : "none"} />
+          </button>
+        </div>
+        
+        {/* Content */}
+        <div className="card-info">
+          <h3 className="card-title">{bookmark.title}</h3>
+          {bookmark.description && (
+            <p className="card-description">{bookmark.description}</p>
+          )}
+          
+          {/* Tags */}
+          <div className="tags-container">
+            {bookmark.tags.slice(0, 3).map(tag => (
+              <span key={tag} className="tag-badge">#{tag}</span>
+            ))}
+            {bookmark.tags.length > 3 && (
+              <span className="tag-badge">+{bookmark.tags.length - 3}</span>
             )}
+          </div>
+          
+          {/* Footer */}
+          <div className="card-footer">
+            <span className="timestamp" title={new Date(bookmark.createdAt).toLocaleString()}>
+              {getTimeAgo(new Date(bookmark.createdAt))}
+            </span>
+            
+            <div className="action-buttons">
+              <button 
+                className="action-btn edit-btn" 
+                onClick={handleEdit}
+                title="Edit"
+              >
+                <Edit size={14} />
+              </button>
+              <button 
+                className="action-btn delete-btn" 
+                onClick={handleDelete}
+                title="Delete"
+              >
+                <Trash2 size={14} />
+              </button>
+              {bookmark.type === 'bookmark' && bookmark.url && (
+                <button 
+                  className="action-btn visit-btn" 
+                  onClick={handleVisit}
+                  title="Open link"
+                >
+                  <ExternalLink size={14} />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
